@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
 
+import { Task } from "src/task/entities/task.entity";
 import { User } from "src/users/entities/user.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class List {
@@ -17,5 +18,8 @@ export class List {
 
     @ManyToOne( () => User, (user) => user.lists, { onDelete: 'CASCADE' })
     user: User;
+
+    @OneToMany( () => Task, (task) => task.list )
+    tasks: Task[];
 
 }

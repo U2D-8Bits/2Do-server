@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { List } from "src/lists/entities/list.entity";
+import { Task } from "src/task/entities/task.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
@@ -22,4 +23,7 @@ export class User {
 
     @OneToMany( () => List, (list) => list.user )
     lists: List[];
+
+    @OneToMany( () => Task, (task) => task.user )
+    tasks: Task[];
 }

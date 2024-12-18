@@ -33,12 +33,9 @@ import { SubtaskModule } from './subtask/subtask.module';
     TypeOrmModule.forFeature([]),
 
     UsersModule,
-
     ListsModule,
-
     TaskModule,
-
-    SubtaskModule,
+    SubtaskModule
 
   ],
   controllers: [],

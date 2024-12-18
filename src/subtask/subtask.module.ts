@@ -4,6 +4,7 @@ import { SubtaskService } from './subtask.service';
 import { SubtaskController } from './subtask.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Subtask } from './entities/subtask.entity';
+import { TaskModule } from 'src/task/task.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { Subtask } from './entities/subtask.entity';
     TypeOrmModule.forFeature([
       Subtask,
     ]),
+    TaskModule
   ],
   controllers: [SubtaskController],
   providers: [SubtaskService],

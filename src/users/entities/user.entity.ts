@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { List } from "src/lists/entities/list.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class User {
@@ -18,4 +19,7 @@ export class User {
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     dt_user_created_at: Date;
+
+    @OneToMany( () => List, (list) => list.user )
+    lists: List[];
 }

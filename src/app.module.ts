@@ -9,6 +9,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ListsModule } from './lists/lists.module';
+import { TaskModule } from './task/task.module';
+import { SubtaskModule } from './subtask/subtask.module';
 
 
 @Module({
@@ -33,6 +35,10 @@ import { ListsModule } from './lists/lists.module';
     UsersModule,
 
     ListsModule,
+
+    TaskModule,
+
+    SubtaskModule,
 
   ],
   controllers: [],

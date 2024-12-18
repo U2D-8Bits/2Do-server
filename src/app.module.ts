@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppService } from './app.service';
+import { UsersModule } from './users/users.module';
 
 
 @Module({
@@ -22,10 +23,13 @@ import { AppService } from './app.service';
       password: process.env.PGPASSWORD,
       database: process.env.POSTGRES_DB,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      autoLoadEntities: true,
       synchronize: true,
     }),
 
     TypeOrmModule.forFeature([]),
+
+    UsersModule,
 
   ],
   controllers: [],

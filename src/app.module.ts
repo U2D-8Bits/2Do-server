@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
+import { ListsModule } from './lists/lists.module';
 
 
 @Module({
@@ -30,6 +31,8 @@ import { UsersModule } from './users/users.module';
     TypeOrmModule.forFeature([]),
 
     UsersModule,
+
+    ListsModule,
 
   ],
   controllers: [],

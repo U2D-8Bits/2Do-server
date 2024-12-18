@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 
 import { List } from "src/lists/entities/list.entity";
+import { Subtask } from "src/subtask/entities/subtask.entity";
 import { User } from "src/users/entities/user.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 

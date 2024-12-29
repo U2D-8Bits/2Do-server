@@ -43,13 +43,15 @@ export class UsersService {
 
     //* Si el usuario ya existe lanzamos un error
     if( userExists ){
+      
+      if( userExists.str_user_username === str_user_username ){
+        throw new HttpException('El nombre de usuario ya está en uso', HttpStatus.BAD_REQUEST);
+      }
+      
       if( userExists.str_user_email === str_user_email ){
         throw new HttpException('El correo electrónico ya está en uso', HttpStatus.BAD_REQUEST);
       }
 
-      if( userExists.str_user_username === str_user_username ){
-        throw new HttpException('El nombre de usuario ya está en uso', HttpStatus.BAD_REQUEST);
-      }
     }
 
     //* Encriptamos la contraseña
@@ -102,6 +104,68 @@ export class UsersService {
   }
 
 
+  //?--------------------------------------------------------------------------------
+  //? Servicio para obtener un usuario por ID
+  //?--------------------------------------------------------------------------------
+
+  async getUserById(id: number): Promise<User>{
+
+    //* Buscamos el usuario en la base de datos
+    const user = await this.userRepository.findOne({
+      where: { int_user_id: id}
+    });
+
+    //* Si el usuario no existe lanzamos un error
+    if (!user) {
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    
+    try {
+      //* Retornamos el usuario 
+      return user;
+
+    } catch (error) {
+      //* Si hay un error lanzamos un error
+      throw new HttpException('Error al obtener el usuario', HttpStatus.BAD_REQUEST);
+
+    }
+  }
+
+
+  //?--------------------------------------------------------------------------------
+  //? Servicio para actualizar un usuario
+  //?--------------------------------------------------------------------------------
+
+
+  //?--------------------------------------------------------------------------------
+  //? Servicio para eliminar un usuario
+  //?--------------------------------------------------------------------------------
+
+  async deleteUser(id: number): Promise<User>{
+
+    //* Buscamos el usuario en la base de datos
+    const user = await this.userRepository.findOne({
+      where: { int_user_id: id}
+    })
+
+
+    //* Si el usuario no existe lanzamos un error
+    if( !user ){
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    try {
+      //* Eliminamos el usuario
+      await this.userRepository.remove(user);
+      return user;
+
+    } catch (error) {
+      //* Si hay un error lanzamos un error
+      throw new HttpException('Error al eliminar el usuario', HttpStatus.BAD_REQUEST);
+    }
+
+  }
 
 
   //?--------------------------------------------------------------------------------

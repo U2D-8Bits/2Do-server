@@ -37,19 +37,31 @@ export class UsersController {
     return users;
   }
 
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.usersService.findOne(+id);
-  // }
+  //?--------------------------------------------------------------------------------
+  //? Servicio para obtener un usuario por ID
+  //?--------------------------------------------------------------------------------
+  @Get(':id')
+  async findOneById(
+    @Param('id') id: number
+  ){
+    const user = await this.usersService.getUserById(id);
+    return user;
+  }
 
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
   //   return this.usersService.update(+id, updateUserDto);
   // }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.usersService.remove(+id);
-  // }
+
+  //?--------------------------------------------------------------------------------
+  //? Servicio para eliminar un usuario
+  //?--------------------------------------------------------------------------------
+  @Delete(':id')
+  async removeUser(
+    @Param('id') id: number
+  ){
+    const user = await this.usersService.deleteUser(id);
+    return user;
+  }
 }

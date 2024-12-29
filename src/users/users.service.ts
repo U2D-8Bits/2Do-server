@@ -75,12 +75,6 @@ export class UsersService {
 
   }
 
-
-  //?--------------------------------------------------------------------------------
-  //? Servicio para loguear un usuario
-  //?--------------------------------------------------------------------------------
-
-
   //?--------------------------------------------------------------------------------
   //? Servicio para obtener todos los usuarios registrados con paginación
   //?--------------------------------------------------------------------------------
@@ -137,6 +131,40 @@ export class UsersService {
   //? Servicio para actualizar un usuario
   //?--------------------------------------------------------------------------------
 
+  async updateUser( updateUserDto: UpdateUserDto, id: number ): Promise<User>{
+
+    //* Buscamos el usuario en la base de datos
+    const user = await this.userRepository.findOne({
+      where: { int_user_id: id}
+    })
+
+    //* Si el usuario no existe lanzamos un error
+    if( !user ){
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    //* desestructuramos el usuario a actualizar
+    const { str_user_email, str_user_username, str_user_password } = updateUserDto;
+
+    //* Actualizamos los datos del usuario
+    const updatedUser = {
+      ...user,
+      str_user_email: str_user_email || user.str_user_email,
+      str_user_username: str_user_username || user.str_user_username,
+      str_user_password: str_user_password ? await bcrypt.hash(str_user_password, 10) : user.str_user_password
+    }
+
+    try {
+      await this.userRepository.save(updatedUser);
+      return updatedUser;
+
+    } catch (error) {
+      //* Si hay un error lanzamos un error
+      throw new HttpException('Error al actualizar el usuario', HttpStatus.BAD_REQUEST);
+    }
+
+  }
+
 
   //?--------------------------------------------------------------------------------
   //? Servicio para eliminar un usuario
@@ -165,15 +193,6 @@ export class UsersService {
       throw new HttpException('Error al eliminar el usuario', HttpStatus.BAD_REQUEST);
     }
 
-  }
-
-
-  //?--------------------------------------------------------------------------------
-  //? Servicio para generar un token con jwt
-  //?--------------------------------------------------------------------------------
-  geyJwtToken( payload: JwtPayload ){
-    const token = this.jwtService.sign( payload );
-    return token;
   }
 
 }

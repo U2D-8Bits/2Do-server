@@ -48,10 +48,18 @@ export class UsersController {
     return user;
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.usersService.update(+id, updateUserDto);
-  // }
+  
+  //?--------------------------------------------------------------------------------
+  //? Servicio para actualizar un usuario
+  //?--------------------------------------------------------------------------------
+  @Patch(':id')
+  async updateUser(
+    @Param('id') id: number,
+    @Body() updateUserDto: UpdateUserDto
+  ){
+    const user = await this.usersService.updateUser(updateUserDto, Number(id));
+    return user;
+  }
 
 
   //?--------------------------------------------------------------------------------

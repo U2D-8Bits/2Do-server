@@ -1,34 +1,75 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
+
+
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-@Controller('users')
+@Controller('api/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  //?--------------------------------------------------------------------------------
+  //? Servicio para registrar un usuario
+  //?--------------------------------------------------------------------------------
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() registerUserDto: CreateUserDto) {
+    return await this.usersService.registerUser(registerUserDto);
   }
 
+  //?--------------------------------------------------------------------------------
+  //? Servicio para iniciar sesión
+  //?--------------------------------------------------------------------------------
+
+
+  //?--------------------------------------------------------------------------------
+  //? Servicio para obtener todos los usuarios paginados
+  //?--------------------------------------------------------------------------------
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  async findAllUsers(
+    @Query('page') page: number,
+    @Query('limit') limit: number
+  ){
+    const users = await this.usersService.getAllPaginatedUsers(Number(page) || 1, Number(limit) || 10);
+    return users;
   }
 
+  //?--------------------------------------------------------------------------------
+  //? Servicio para obtener un usuario por ID
+  //?--------------------------------------------------------------------------------
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  async findOneById(
+    @Param('id') id: number
+  ){
+    const user = await this.usersService.getUserById(id);
+    return user;
   }
 
+  
+  //?--------------------------------------------------------------------------------
+  //? Servicio para actualizar un usuario
+  //?--------------------------------------------------------------------------------
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  async updateUser(
+    @Param('id') id: number,
+    @Body() updateUserDto: UpdateUserDto
+  ){
+    const user = await this.usersService.updateUser(updateUserDto, Number(id));
+    return user;
   }
 
+
+  //?--------------------------------------------------------------------------------
+  //? Servicio para eliminar un usuario
+  //?--------------------------------------------------------------------------------
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  async removeUser(
+    @Param('id') id: number
+  ){
+    const user = await this.usersService.deleteUser(id);
+    return user;
   }
 }

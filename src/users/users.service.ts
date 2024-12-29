@@ -22,78 +22,91 @@ export class UsersService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ){}
 
+  //?--------------------------------------------------------------------------------
+  //? Servicio para registrar un usuario
+  //?--------------------------------------------------------------------------------
+  async registerUser(registerUserDto: CreateUserDto) {
+    
+    //* Desestructuramos el objeto registerUserDto
+    const { str_user_email, str_user_password, str_user_username } = registerUserDto;
 
-  //? Servicio para crear un usuario
-  async createUser(createUserDto: CreateUserDto) {
-    //* Creamos una constante y extraemos los valores del DTO
-    const { str_user_username, str_user_email, str_user_password } = createUserDto;
-  
+    //* Cremos un hash de la contraseña
     const saltOrRounds = 10;
-  
-    //* Verificamos si el usuario ya existe
+
+    //* Verificamos si el usuario ya existe en la base de datos
     const userExists = await this.userRepository.findOne({
-      where: [{ str_user_username }, { str_user_email }],
-    });
-  
-    //* Si el usuario ya existe, lanzamos un error
-    if (userExists) {
-      if (userExists.str_user_username === str_user_username) {
-        throw new HttpException('El usuario ya existe', HttpStatus.BAD_REQUEST);
+      where: [
+        { str_user_email },
+        { str_user_username }
+      ]
+    })
+
+    //* Si el usuario ya existe lanzamos un error
+    if( userExists ){
+      if( userExists.str_user_email === str_user_email ){
+        throw new HttpException('El correo electrónico ya está en uso', HttpStatus.BAD_REQUEST);
       }
-  
-      if (userExists.str_user_email === str_user_email) {
-        throw new HttpException('El correo ya existe', HttpStatus.BAD_REQUEST);
+
+      if( userExists.str_user_username === str_user_username ){
+        throw new HttpException('El nombre de usuario ya está en uso', HttpStatus.BAD_REQUEST);
       }
     }
-  
+
     //* Encriptamos la contraseña
-    const hashPassword = await bcrypt.hash(str_user_password, saltOrRounds);
-  
+    const hashedPassword = await bcrypt.hash(str_user_password, saltOrRounds);
+
+
     //* Registramos el usuario en la base de datos
-    const newUser = await this.userRepository.create({
-      str_user_username,
-      str_user_password: hashPassword,
+    const registeredUser = await this.userRepository.create({
       str_user_email,
-    });
-  
+      str_user_username,
+      str_user_password: hashedPassword
+    })
+
     try {
-      await this.userRepository.save(newUser);
-  
-      const payload: JwtPayload = { id: newUser.int_user_id.toString() };
-      const token = this.geyJwtToken(payload);
-  
-      return {
-        newUser,
-        token,
-      };
+      await this.userRepository.save(registeredUser);
+      return registeredUser
+
     } catch (error) {
-      throw new HttpException('Error al crear usuario', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Error al registrar el usuario', HttpStatus.BAD_REQUEST);
+    }
+
+  }
+
+
+  //?--------------------------------------------------------------------------------
+  //? Servicio para loguear un usuario
+  //?--------------------------------------------------------------------------------
+
+
+  //?--------------------------------------------------------------------------------
+  //? Servicio para obtener todos los usuarios registrados con paginación
+  //?--------------------------------------------------------------------------------
+
+  async getAllPaginatedUsers( page: number = 1, limit: number = 10 ): Promise<{ users: User[], total: number}>{
+
+    if( page < 1 || limit <1 ){
+      throw new HttpException('La página y el límite deben ser mayores a 0', HttpStatus.BAD_REQUEST);
+    }
+
+    const [ users, total ] = await this.userRepository.findAndCount({
+      skip: ( page - 1 ) * limit,
+      take: limit,
+    });
+
+
+    return{
+      users,
+      total
     }
   }
 
-  findAll() {
-    const users = this.userRepository.find();
-    return users;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
 
 
 
   //?--------------------------------------------------------------------------------
   //? Servicio para generar un token con jwt
   //?--------------------------------------------------------------------------------
-
   geyJwtToken( payload: JwtPayload ){
     const token = this.jwtService.sign( payload );
     return token;

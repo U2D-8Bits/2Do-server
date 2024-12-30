@@ -7,10 +7,15 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { LoginDto } from './dto/login.dto';
+import { LoginService } from './login.service';
 
 @Controller('api/users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly loginService: LoginService
+  ) {}
 
   //?--------------------------------------------------------------------------------
   //? Servicio para registrar un usuario
@@ -23,6 +28,12 @@ export class UsersController {
   //?--------------------------------------------------------------------------------
   //? Servicio para iniciar sesión
   //?--------------------------------------------------------------------------------
+  @Post('login')
+  async login(
+    @Body() loginDto: LoginDto
+  ){
+    return await this.loginService.login(loginDto);
+  }
 
 
   //?--------------------------------------------------------------------------------

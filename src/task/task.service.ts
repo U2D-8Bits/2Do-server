@@ -11,6 +11,7 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './entities/task.entity';
 import { Repository } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
 
 //*------------------------------------------------------------------
 //* Service Class
@@ -22,6 +23,7 @@ export class TaskService {
   //*------------------------------------------------------------------
   constructor(
     @InjectRepository(Task) private taskRepository: Repository<Task>,
+    @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
   //*------------------------------------------------------------------
@@ -29,11 +31,24 @@ export class TaskService {
   //*------------------------------------------------------------------
   async create(createTaskDto: CreateTaskDto): Promise<Task> {
     try {
+      const { int_user_id, ...content } = createTaskDto;
+
+      const userFound = await this.userRepository.findOne({
+        where: { int_user_id },
+      });
+
+      if (!userFound) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+
       //? Create a new task
-      const taks = this.taskRepository.create(createTaskDto);
+      const task = this.taskRepository.create({
+        ...content,
+        user: userFound,
+      });
 
       //? Save the task
-      return await this.taskRepository.save(taks);
+      return await this.taskRepository.save(task);
     } catch (error) {
       //? Throw error
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -58,8 +73,10 @@ export class TaskService {
       const [tasks, total] = await this.taskRepository.findAndCount({
         skip: (page - 1) * limit,
         take: limit,
+        relations: ['user'],
       });
 
+      //? Return tasks with total count and user details
       return {
         tasks,
         total,
@@ -97,19 +114,19 @@ export class TaskService {
   //* Method to update a task by id
   //*------------------------------------------------------------------
   async update(id: number, updateTaskDto: UpdateTaskDto): Promise<Task> {
+    const task = await this.taskRepository.findOne({
+      where: { int_task_id: id },
+      relations: ['user'],
+    });
+
+    if (!task) {
+      throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
+    }
+
     try {
-      const task = this.taskRepository.findOne({
-        where: { int_task_id: id },
-        relations: ['user'],
-      });
+      const taskUpdated = await Object.assign(task, updateTaskDto);
 
-      if (!task) {
-        throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
-      }
-
-      const updatedTask = Object.assign(task, updateTaskDto);
-
-      return await this.taskRepository.save(updatedTask);
+      return await this.taskRepository.save(taskUpdated);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

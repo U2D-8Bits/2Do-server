@@ -48,8 +48,4 @@ export class UpdateTaskDto extends PartialType(CreateTaskDto) {
     @IsDateString()
     dt_task_created_at: Date;
 
-    @IsOptional()
-    @IsNumber()
-    int_user_id: number;
-
 }

@@ -68,4 +68,17 @@ export class LoginService{
     }
 
   }
+
+  //?--------------------------------------------------------------------------------
+  //? Servicio para verificar el token
+  //?--------------------------------------------------------------------------------
+
+  async verifyToken( token: string ){
+    try {
+      const payload = this.jwtService.verify(token);
+      return payload;
+    } catch (error) {
+      throw new HttpException('Token inválido', HttpStatus.UNAUTHORIZED);
+    }
+  }
 }

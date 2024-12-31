@@ -25,16 +25,6 @@ export class UsersController {
     return await this.usersService.registerUser(registerUserDto);
   }
 
-  //?--------------------------------------------------------------------------------
-  //? Servicio para iniciar sesión
-  //?--------------------------------------------------------------------------------
-  @Post('login')
-  async login(
-    @Body() loginDto: LoginDto
-  ){
-    return await this.loginService.login(loginDto);
-  }
-
 
   //?--------------------------------------------------------------------------------
   //? Servicio para obtener todos los usuarios paginados

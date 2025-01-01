@@ -38,5 +38,5 @@ export class FindTaskByUserDto {
 
   @IsOptional()
   @IsString()
-  dueDate?: string;
+  dueDate: string;
 }

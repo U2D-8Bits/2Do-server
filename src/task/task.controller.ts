@@ -1,34 +1,69 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
+
+
+//*------------------------------------------------------------------
+//* Import Dependency
+//*------------------------------------------------------------------
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
-@Controller('task')
+//*------------------------------------------------------------------
+//* Controller Class
+//*------------------------------------------------------------------
+@Controller('api/task')
 export class TaskController {
+
+
+  //*------------------------------------------------------------------
+  //* Constructor
+  //*----------------------------------------------------------------
   constructor(private readonly taskService: TaskService) {}
 
+  //*------------------------------------------------------------------
+  //* Method to create a new task
+  //*------------------------------------------------------------------
   @Post()
   create(@Body() createTaskDto: CreateTaskDto) {
     return this.taskService.create(createTaskDto);
   }
 
+  //*------------------------------------------------------------------
+  //* Method to find all tasks paginated
+  //*----------------------------------------------------------------
   @Get()
-  findAll() {
-    return this.taskService.findAll();
+  findAll(
+    @Param('page') page: number,
+    @Param('limit') limit: number
+  ) {
+    const tasks = this.taskService.findAll(Number(page) || 1, Number(limit) || 10);
+    return tasks;
   }
 
+  //*------------------------------------------------------------------
+  //* Method to find one task
+  //*------------------------------------------------------------------
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.taskService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.taskService.findOne(id);
   }
 
+  //*------------------------------------------------------------------
+  //* Method to update a task
+  //*------------------------------------------------------------------
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.taskService.update(+id, updateTaskDto);
+  update(@Param('id') id: number, @Body() updateTaskDto: UpdateTaskDto) {
+    return this.taskService.update(id, updateTaskDto);
   }
 
+  //*------------------------------------------------------------------
+  //* Method to remove a task
+  //*------------------------------------------------------------------
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.taskService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.taskService.removeTask(id);
   }
 }

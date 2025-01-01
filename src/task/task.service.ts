@@ -87,6 +87,68 @@ export class TaskService {
   }
 
   //*------------------------------------------------------------------
+  //* Method to find all tasks by user id with pagination and filter
+  //*------------------------------------------------------------------
+  async findAllByUser(
+    int_user_id: number,
+    page = 1,
+    limit = 10,
+    filters?: { completed?: boolean; priority?: number; dueDate: string },
+  ): Promise<{ tasks: Task[]; total: number }> {
+    
+    const queryBuilder = this.taskRepository.createQueryBuilder('task');
+
+    try {
+      
+      //? Filter user
+      queryBuilder.andWhere(
+        'task.user.int_user_id = :int_user_id',
+        { int_user_id },
+      )
+
+
+      //? Dynamic filters
+      if (filters?.completed !== undefined) {
+        queryBuilder.andWhere('task.bl_task_completed = :completed', {
+          completed: filters.completed,
+        });
+      }
+  
+      if (filters?.priority) {
+        queryBuilder.andWhere('task.int_task_priority = :priority', {
+          priority: filters.priority,
+        });
+      }
+  
+      if (filters?.dueDate) {
+        if (isNaN(Date.parse(filters.dueDate))) {
+          throw new HttpException('Invalid date format for dueDate', HttpStatus.BAD_REQUEST);
+        }
+        queryBuilder.andWhere('task.dt_task_due_date = :dueDate', {
+          dueDate: filters.dueDate,
+        });
+      }
+  
+      // Contar total de resultados
+      const total = await queryBuilder.getCount();
+  
+      // Aplicar paginación y ordenación
+      const tasks = await queryBuilder
+        .orderBy('task.dt_task_created_at', 'DESC')
+        .skip((page - 1) * limit)
+        .take(limit)
+        .getMany();
+  
+      return { tasks, total };
+
+    } catch (error) {
+      throw new HttpException(`Database error: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
+  }
+
+  //*------------------------------------------------------------------
   //* Method to find one task by id
   //*----------------------------------------------------------------
   async findOne(int_task_id: number): Promise<Task> {

@@ -73,7 +73,7 @@ export class TaskService {
       const [tasks, total] = await this.taskRepository.findAndCount({
         skip: (page - 1) * limit,
         take: limit,
-        relations: ['user'],
+        relations: ['user', 'subtasks'],
       });
 
       //? Return tasks with total count and user details
@@ -104,7 +104,7 @@ export class TaskService {
       queryBuilder.andWhere(
         'task.user.int_user_id = :int_user_id',
         { int_user_id },
-      )
+      ).leftJoinAndSelect('task.user', 'user').leftJoinAndSelect('task.subtasks', 'subtasks');
 
 
       //? Dynamic filters
@@ -156,7 +156,7 @@ export class TaskService {
       //? Find one task
       const task = await this.taskRepository.findOne({
         where: { int_task_id },
-        relations: ['user'],
+        relations: ['user', 'subtasks'],
       });
 
       //? If task not found
@@ -178,7 +178,7 @@ export class TaskService {
   async update(id: number, updateTaskDto: UpdateTaskDto): Promise<Task> {
     const task = await this.taskRepository.findOne({
       where: { int_task_id: id },
-      relations: ['user'],
+      relations: ['user', 'subtasks'],
     });
 
     if (!task) {

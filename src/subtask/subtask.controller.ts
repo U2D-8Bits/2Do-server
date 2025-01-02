@@ -22,10 +22,12 @@ export class SubtaskController {
 
 
   //*------------------------------------------------------------------
-  //* Create Subtask
+  //* Create Subtask by task ID
   //*------------------------------------------------------------------
-  @Post()
-  create(@Body() createSubtaskDto: CreateSubtaskDto) {
+  @Post(':id')
+  create(
+    @Param('id') id: number,
+    @Body() createSubtaskDto: CreateSubtaskDto) {
     return this.subtaskService.create(createSubtaskDto);
   }
 

@@ -27,7 +27,7 @@ export class SubtaskService {
   ) {}
 
   //*------------------------------------------------------------------
-  //* Create Substask
+  //* Create Substask by Task ID
   //*------------------------------------------------------------------
   async create(createSubtaskDto: CreateSubtaskDto): Promise<Subtask> {
     const { int_task_id } = createSubtaskDto;
@@ -72,8 +72,8 @@ export class SubtaskService {
       //?Verify if subtasks exists
       const subtasks = await this.subtaskRepository.find();
 
-      if (!subtasks) {
-        throw new HttpException(`Subtasks not found`, HttpStatus.NOT_FOUND);
+      if (subtasks.length === 0) {
+        throw new HttpException(`Subtasks not found for the Task ID ${int_task_id}`, HttpStatus.NOT_FOUND);
       }
 
       return subtasks;
@@ -110,8 +110,7 @@ export class SubtaskService {
   //*------------------------------------------------------------------
   async update(id: number, updateSubtaskDto: UpdateSubtaskDto) {
     const subtask = await this.subtaskRepository.findOne({
-      where: { int_subtask_id: id },
-      relations: ['task'],
+      where: { int_subtask_id: id }
     });
 
     if (!subtask) {

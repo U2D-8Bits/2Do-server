@@ -11,6 +11,9 @@ export class Subtask {
     @Column()
     str_subtask_title: string;
 
+    @Column()
+    bln_subtask_completed: boolean;
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     dt_subtask_created_at: Date;
 

@@ -5,7 +5,7 @@
 //* Import Modules
 //*------------------------------------------------------------------
 
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 //*------------------------------------------------------------------
 //* DTO Class
@@ -15,6 +15,10 @@ export class CreateSubtaskDto {
     @IsString()
     @IsNotEmpty()
     str_subtask_title: string;
+
+    @IsBoolean()
+    @IsNotEmpty()
+    bln_subtask_completed: boolean;
 
     @IsNumber()
     @IsNotEmpty()

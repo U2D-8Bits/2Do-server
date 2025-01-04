@@ -5,12 +5,14 @@ import { SubtaskController } from './subtask.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Subtask } from './entities/subtask.entity';
 import { TaskModule } from 'src/task/task.module';
+import { Task } from 'src/task/entities/task.entity';
 
 @Module({
   imports: [
 
     TypeOrmModule.forFeature([
       Subtask,
+      Task
     ]),
     TaskModule
   ],

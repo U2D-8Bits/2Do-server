@@ -73,6 +73,7 @@ export class ListsService {
     try {
       const lists = await this.listRepository.find({
         where: { user: { int_user_id } },
+        relations: ['tasks', 'user'],
       });
 
       return lists;

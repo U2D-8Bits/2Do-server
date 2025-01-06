@@ -28,19 +28,19 @@ export class TaskController {
   //* Method to create a new task
   //*------------------------------------------------------------------
   @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
-    return this.taskService.create(createTaskDto);
+  async create(@Body() createTaskDto: CreateTaskDto) {
+    return await this.taskService.create(createTaskDto);
   }
 
   //*------------------------------------------------------------------
   //* Method to find all tasks paginated
   //*----------------------------------------------------------------
   @Get()
-  findAll(
+  async findAll(
     @Param('page') page: number,
     @Param('limit') limit: number
   ) {
-    const tasks = this.taskService.findAll(Number(page) || 1, Number(limit) || 10);
+    const tasks = await this.taskService.findAll(Number(page) || 1, Number(limit) || 10);
     return tasks;
   }
 
@@ -64,23 +64,23 @@ async findAllByUser(
   //* Method to find one task
   //*------------------------------------------------------------------
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.taskService.findOne(id);
+  async findOne(@Param('id') id: number) {
+    return await this.taskService.findOne(id);
   }
 
   //*------------------------------------------------------------------
   //* Method to update a task
   //*------------------------------------------------------------------
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.taskService.update(id, updateTaskDto);
+  async update(@Param('id') id: number, @Body() updateTaskDto: UpdateTaskDto) {
+    return await this.taskService.update(id, updateTaskDto);
   }
 
   //*------------------------------------------------------------------
   //* Method to remove a task
   //*------------------------------------------------------------------
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.taskService.removeTask(id);
+  async remove(@Param('id') id: number) {
+    return await this.taskService.removeTask(id);
   }
 }

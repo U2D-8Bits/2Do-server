@@ -12,7 +12,7 @@ import { UpdateListDto } from './dto/update-list.dto';
 //*------------------------------------------------------------------
 //* Controller Class
 //*------------------------------------------------------------------
-@Controller('lists')
+@Controller('api/lists')
 export class ListsController {
 
   //*------------------------------------------------------------------
@@ -24,41 +24,42 @@ export class ListsController {
   //* Create List
   //*------------------------------------------------------------------
   @Post()
-  create(@Body() createListDto: CreateListDto) {
-    return this.listsService.create(createListDto);
+  async create(@Body() createListDto: CreateListDto) {
+    return await this.listsService.create(createListDto);
   }
 
   //*------------------------------------------------------------------
   //* Find All Lists by User ID
   //*------------------------------------------------------------------
   @Get('user/:id')
-  findAll(
+  async findAll(
     @Param('id') id: number
   ) {
-    return this.listsService.findAll(id);
+    console.log('response', this.listsService.findAll(id));
+    return await this.listsService.findAll(id);
   }
 
   //*------------------------------------------------------------------
   //* Find One List by ID
   //*----------------------------------------------------------------
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.listsService.findOne(id);
+  async findOne(@Param('id') id: number) {
+    return await this.listsService.findOne(id);
   }
 
   //*------------------------------------------------------------------
   //* Update List by ID
   //*------------------------------------------------------------------
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updateListDto: UpdateListDto) {
-    return this.listsService.update(id, updateListDto);
+  async update(@Param('id') id: number, @Body() updateListDto: UpdateListDto) {
+    return await this.listsService.update(id, updateListDto);
   }
 
   //*------------------------------------------------------------------
   //* Remove List by ID
   //*----------------------------------------------------------------
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.listsService.remove(id);
+  async remove(@Param('id') id: number) {
+    return await this.listsService.remove(id);
   }
 }

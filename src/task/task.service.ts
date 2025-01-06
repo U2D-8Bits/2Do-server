@@ -84,7 +84,7 @@ export class TaskService {
 
     try {
       return await this.taskRepository.find({
-        where: { list: {int_list_id} },
+        where: { list: { int_list_id } },
         relations: ['user', 'subtasks'],
       });
     } catch (error) {
@@ -226,6 +226,42 @@ export class TaskService {
       const taskUpdated = await Object.assign(task, updateTaskDto);
 
       return await this.taskRepository.save(taskUpdated);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  //*------------------------------------------------------------------
+  //* Method to move task to another list
+  //*------------------------------------------------------------------
+  async updateTaskList(int_task_id: number, newListId: number): Promise<Task> {
+    const task = await this.taskRepository.findOne({
+      where: { int_task_id },
+      relations: ['list'],
+    });
+
+    if (!task) {
+      throw new HttpException(
+        `Task with ID ${int_task_id} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const newList = await this.listRepository.findOne({
+      where: { int_list_id: newListId },
+    });
+
+    if (!newList) {
+      throw new HttpException(
+        `List with ID ${newListId} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    try {
+      task.list = newList;
+
+      return await this.taskRepository.save(task);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

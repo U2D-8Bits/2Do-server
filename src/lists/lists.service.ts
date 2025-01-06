@@ -29,9 +29,10 @@ export class ListsService {
   //* Create List
   //*------------------------------------------------------------------
   async create(createListDto: CreateListDto): Promise<List> {
-    const { int_user_id } = createListDto;
+    const { int_user_id, str_list_name } = createListDto;
 
     try {
+      // Verificar si el usuario existe
       const user = await this.userRepository.findOne({
         where: { int_user_id },
       });
@@ -40,13 +41,15 @@ export class ListsService {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
 
-      const list = await this.listRepository.create(createListDto);
+      // Crear la lista asociada al usuario
+      const list = this.listRepository.create({
+        str_list_name,
+        user,
+      });
 
-      await this.listRepository.save(list);
-
-      return list;
+      return await this.listRepository.save(list);
     } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -54,26 +57,28 @@ export class ListsService {
   //* Find All Lists by User ID
   //*------------------------------------------------------------------
   async findAll(int_user_id: number): Promise<List[]> {
+    // Verificar si el usuario existe
     const user = await this.userRepository.findOne({
       where: { int_user_id },
     });
 
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        `User not found with ID ${int_user_id}`,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
+    // Obtener las listas asociadas al usuario
     try {
       const lists = await this.listRepository.find({
-        where: { user },
+        where: { user: { int_user_id } },
+        relations: ['tasks', 'user'],
       });
-
-      if (lists.length === 0) {
-        throw new HttpException('Lists not found', HttpStatus.NOT_FOUND);
-      }
 
       return lists;
     } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -126,7 +131,6 @@ export class ListsService {
   //* Remove List by ID
   //*------------------------------------------------------------------
   async remove(id: number): Promise<{ message: string }> {
-
     if (!this.listExists(id)) {
       throw new HttpException(
         `List with ID ${id} not found`,

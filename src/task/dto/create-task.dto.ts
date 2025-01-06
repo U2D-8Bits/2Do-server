@@ -45,4 +45,8 @@ export class CreateTaskDto {
     //?-----------------------------------------------------------------------------------------------
     @IsNumber()
     int_user_id: number;
+
+    @IsOptional()
+    @IsNumber()
+    int_list_id: number;
 }

@@ -12,6 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './entities/task.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { List } from 'src/lists/entities/list.entity';
 
 //*------------------------------------------------------------------
 //* Service Class
@@ -24,6 +25,7 @@ export class TaskService {
   constructor(
     @InjectRepository(Task) private taskRepository: Repository<Task>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(List) private listRepository: Repository<List>,
   ) {}
 
   //*------------------------------------------------------------------
@@ -31,7 +33,7 @@ export class TaskService {
   //*------------------------------------------------------------------
   async create(createTaskDto: CreateTaskDto): Promise<Task> {
     try {
-      const { int_user_id, ...content } = createTaskDto;
+      const { int_user_id, int_list_id, ...content } = createTaskDto;
 
       const userFound = await this.userRepository.findOne({
         where: { int_user_id },
@@ -41,16 +43,51 @@ export class TaskService {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
 
+      let list = null;
+
+      if (int_list_id) {
+        list = await this.listRepository.findOne({
+          where: { int_list_id },
+        });
+
+        if (!list) {
+          throw new HttpException('List not found', HttpStatus.NOT_FOUND);
+        }
+      }
+
       //? Create a new task
       const task = this.taskRepository.create({
         ...content,
         user: userFound,
+        list: list,
       });
 
       //? Save the task
       return await this.taskRepository.save(task);
     } catch (error) {
       //? Throw error
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  //*------------------------------------------------------------------
+  //* Method to find all tasks by List ID
+  //*------------------------------------------------------------------
+  async findAllByList(int_list_id: number): Promise<Task[]> {
+    const list = await this.listRepository.findOne({
+      where: { int_list_id },
+    });
+
+    if (!list) {
+      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
+    }
+
+    try {
+      return await this.taskRepository.find({
+        where: { list: { int_list_id } },
+        relations: ['user', 'subtasks'],
+      });
+    } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -95,17 +132,14 @@ export class TaskService {
     limit = 10,
     filters?: { completed?: boolean; priority?: number; dueDate: string },
   ): Promise<{ tasks: Task[]; total: number }> {
-    
     const queryBuilder = this.taskRepository.createQueryBuilder('task');
 
     try {
-      
       //? Filter user
-      queryBuilder.andWhere(
-        'task.user.int_user_id = :int_user_id',
-        { int_user_id },
-      ).leftJoinAndSelect('task.user', 'user').leftJoinAndSelect('task.subtasks', 'subtasks');
-
+      queryBuilder
+        .andWhere('task.user.int_user_id = :int_user_id', { int_user_id })
+        .leftJoinAndSelect('task.user', 'user')
+        .leftJoinAndSelect('task.subtasks', 'subtasks');
 
       //? Dynamic filters
       if (filters?.completed !== undefined) {
@@ -113,39 +147,42 @@ export class TaskService {
           completed: filters.completed,
         });
       }
-  
+
       if (filters?.priority) {
         queryBuilder.andWhere('task.int_task_priority = :priority', {
           priority: filters.priority,
         });
       }
-  
+
       if (filters?.dueDate) {
         if (isNaN(Date.parse(filters.dueDate))) {
-          throw new HttpException('Invalid date format for dueDate', HttpStatus.BAD_REQUEST);
+          throw new HttpException(
+            'Invalid date format for dueDate',
+            HttpStatus.BAD_REQUEST,
+          );
         }
         queryBuilder.andWhere('task.dt_task_due_date = :dueDate', {
           dueDate: filters.dueDate,
         });
       }
-  
+
       // Contar total de resultados
       const total = await queryBuilder.getCount();
-  
+
       // Aplicar paginación y ordenación
       const tasks = await queryBuilder
         .orderBy('task.dt_task_created_at', 'DESC')
         .skip((page - 1) * limit)
         .take(limit)
         .getMany();
-  
+
       return { tasks, total };
-
     } catch (error) {
-      throw new HttpException(`Database error: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        `Database error: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-
   }
 
   //*------------------------------------------------------------------
@@ -189,6 +226,49 @@ export class TaskService {
       const taskUpdated = await Object.assign(task, updateTaskDto);
 
       return await this.taskRepository.save(taskUpdated);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  //*------------------------------------------------------------------
+  //* Method to move task to another list
+  //*------------------------------------------------------------------
+  async updateTaskList(int_task_id: number, newListId: number): Promise<Task> {
+    const task = await this.taskRepository.findOne({
+      where: { int_task_id },
+      relations: ['list'],
+    });
+
+    if (!task) {
+      throw new HttpException(
+        `Task with ID ${int_task_id} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const newList = await this.listRepository.findOne({
+      where: { int_list_id: newListId },
+    });
+
+    if (!newList) {
+      throw new HttpException(
+        `List with ID ${newListId} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if( task.list.int_list_id === newList.int_list_id ) {
+      throw new HttpException(
+        `Task is already in list with ID ${newListId}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    try {
+      task.list = newList;
+
+      return await this.taskRepository.save(task);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

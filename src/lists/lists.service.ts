@@ -126,7 +126,6 @@ export class ListsService {
   //* Remove List by ID
   //*------------------------------------------------------------------
   async remove(id: number): Promise<{ message: string }> {
-
     if (!this.listExists(id)) {
       throw new HttpException(
         `List with ID ${id} not found`,

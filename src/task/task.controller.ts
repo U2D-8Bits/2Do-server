@@ -90,6 +90,17 @@ export class TaskController {
   }
 
   //*------------------------------------------------------------------
+  //* Method to move task to another list
+  //*------------------------------------------------------------------
+  @Patch(':id/move-to-list')
+  async moveToAnotherList(
+    @Param('id') id: number,
+    @Body('new_list_id') new_list_id: number,
+  ){
+    return await this.taskService.updateTaskList(id, new_list_id);
+  }
+
+  //*------------------------------------------------------------------
   //* Method to remove a task
   //*------------------------------------------------------------------
   @Delete(':id')

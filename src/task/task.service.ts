@@ -258,6 +258,13 @@ export class TaskService {
       );
     }
 
+    if( task.list.int_list_id === newList.int_list_id ) {
+      throw new HttpException(
+        `Task is already in list with ID ${newListId}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     try {
       task.list = newList;
 

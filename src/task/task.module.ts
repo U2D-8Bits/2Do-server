@@ -7,10 +7,11 @@ import { Task } from './entities/task.entity';
 import { ListsModule } from 'src/lists/lists.module';
 import { UsersModule } from 'src/users/users.module';
 import { User } from 'src/users/entities/user.entity';
+import { List } from 'src/lists/entities/list.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ Task, User ]),
+    TypeOrmModule.forFeature([ Task, User, List ]),
     ListsModule,
     UsersModule
   ],

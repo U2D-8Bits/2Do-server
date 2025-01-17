@@ -61,14 +61,13 @@ export class UsersService {
 
     //* Encriptamos las contraseñas
     const hashedPassword = await bcrypt.hash(str_user_password, saltOrRounds);
-    const hashedPasswordConfirm = await bcrypt.hash(str_user_password_confirm, saltOrRounds);
 
     //* Registramos el usuario en la base de datos
     const registeredUser = await this.userRepository.create({
       str_user_email,
       str_user_username,
       str_user_password: hashedPassword,
-      str_user_password_confirm: hashedPasswordConfirm,
+      str_user_password_confirm: hashedPassword,
       str_user_profile_picture: 'default-profile.png'
     })
 

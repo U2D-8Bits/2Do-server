@@ -18,6 +18,12 @@ export class User {
     @Column()
     str_user_password: string;
 
+    @Column()
+    str_user_password_confirm: string;
+
+    @Column({ default: 'default-profile.png' })
+    str_user_profile_picture: string;
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     dt_user_created_at: Date;
 

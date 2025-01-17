@@ -9,16 +9,16 @@ import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { User } from './entities/user.entity';
 
-import { JwtService } from '@nestjs/jwt';
+import { join } from 'path';
+import * as fs from 'fs';
+
 import * as bcrypt from 'bcrypt';
-import { JwtPayload } from './interfaces';
 
 @Injectable()
 export class UsersService {
 
   //* Constructor
   constructor(
-    private jwtService: JwtService,
     @InjectRepository(User) private userRepository: Repository<User>,
   ){}
 
@@ -28,7 +28,7 @@ export class UsersService {
   async registerUser(registerUserDto: CreateUserDto) {
     
     //* Desestructuramos el objeto registerUserDto
-    const { str_user_email, str_user_password, str_user_username } = registerUserDto;
+    const { str_user_email, str_user_password, str_user_password_confirm, str_user_username } = registerUserDto;
 
     //* Cremos un hash de la contraseña
     const saltOrRounds = 10;
@@ -54,15 +54,22 @@ export class UsersService {
 
     }
 
-    //* Encriptamos la contraseña
-    const hashedPassword = await bcrypt.hash(str_user_password, saltOrRounds);
+    //* Verificamos que las contraseñas sean iguales
+    if( str_user_password !== str_user_password_confirm ){
+      throw new HttpException('Las contraseñas no coinciden', HttpStatus.BAD_REQUEST);
+    }
 
+    //* Encriptamos las contraseñas
+    const hashedPassword = await bcrypt.hash(str_user_password, saltOrRounds);
+    const hashedPasswordConfirm = await bcrypt.hash(str_user_password_confirm, saltOrRounds);
 
     //* Registramos el usuario en la base de datos
     const registeredUser = await this.userRepository.create({
       str_user_email,
       str_user_username,
-      str_user_password: hashedPassword
+      str_user_password: hashedPassword,
+      str_user_password_confirm: hashedPasswordConfirm,
+      str_user_profile_picture: 'default-profile.png'
     })
 
     try {
@@ -163,6 +170,42 @@ export class UsersService {
       throw new HttpException('Error al actualizar el usuario', HttpStatus.BAD_REQUEST);
     }
 
+  }
+
+
+  //?--------------------------------------------------------------------------------
+  //? Servicio para Actualizar foto de perfil
+  //?--------------------------------------------------------------------------------
+
+  async updateProfilePicture(userId: number, filePath: string ): Promise<User>{
+
+    //* Buscamos el usuario en la base de datos
+    const user = await this.userRepository.findOne({
+      where: { int_user_id: userId}
+    })
+
+    //* Si el usuario no existe lanzamos un error
+    if( !user ){
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    //* Creamos la ruta de la imagen
+    const basePath = process.env.PROFILE_PICTURE_PATH || '/uploads/profile_pictures';
+
+    //* Si el usuario ya tiene una foto de perfil la eliminamos
+    if( user.str_user_profile_picture != 'default-profile.png' ){
+      const oldImagePath = join(basePath, user.str_user_profile_picture);
+      if( fs.existsSync(oldImagePath) ){
+        fs.unlinkSync(oldImagePath);
+      }
+    }
+
+    //* Actualizamos la foto de perfil del usuario
+    user.str_user_profile_picture = filePath;
+
+    await this.userRepository.save(user);
+
+    return user;
   }
 
 

@@ -68,7 +68,8 @@ export class UsersService {
       str_user_email,
       str_user_username,
       str_user_password: hashedPassword,
-      str_user_password_confirm: hashedPasswordConfirm
+      str_user_password_confirm: hashedPasswordConfirm,
+      str_user_profile_picture: 'default-profile.png'
     })
 
     try {

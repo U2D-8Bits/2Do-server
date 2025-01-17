@@ -18,7 +18,7 @@ export class User {
     @Column()
     str_user_password: string;
 
-    @Column()
+    @Column({ nullable: true })
     str_user_password_confirm: string;
 
     @Column({ default: 'default-profile.png' })

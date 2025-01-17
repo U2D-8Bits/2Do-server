@@ -34,4 +34,18 @@ export class CreateUserDto {
   })
   @Trim()
   str_user_password: string;
+
+  @IsString()
+  @MinLength(8, {
+    message: 'La confirmación de la contraseña debe tener al menos 8 caracteres',
+  })
+  @MaxLength(20, {
+    message: 'La confirmación de la contraseña no puede tener más de 20 caracteres',
+  })
+  @Matches(/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*])/, {
+    message:
+      'La confirmación de la contraseña debe incluir al menos una letra mayúscula, una minúscula, un número y un carácter especial (!@#$%^&*)',
+  })
+  @Trim()
+  str_user_password_confirm: string;
 }

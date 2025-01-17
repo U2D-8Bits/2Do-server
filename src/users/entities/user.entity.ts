@@ -21,7 +21,7 @@ export class User {
     @Column()
     str_user_password_confirm: string;
 
-    @Column({ nullable: true })
+    @Column({ default: 'default-profile.png' })
     str_user_profile_picture: string;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

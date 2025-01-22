@@ -130,9 +130,6 @@ export class UsersService {
       const basePath = `${process.env.BASE_URL}/uploads/profile_pictures` || 'http://localhost:3000/uploads/profile_pictures';
       user.str_user_profile_picture = `${basePath}/${user.str_user_profile_picture}`;
     }
-
-    console.log(user.str_user_profile_picture);
-
     
     try {
       //* Retornamos el usuario 

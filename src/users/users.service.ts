@@ -120,6 +120,19 @@ export class UsersService {
       throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
     }
 
+    //* Verificamos si el usuario tiene una imagen distinta a la por defecto
+    if( user.str_user_profile_picture == 'default-profile.png' ){
+      //* Creamos la ruta de la imagen por defecto
+      const basePath = `${process.env.BASE_URL}/uploads/default-profile.png`;
+      user.str_user_profile_picture = basePath;
+    }else{
+      //* Creamos la ruta de la imagen
+      const basePath = `${process.env.BASE_URL}/uploads/profile_pictures` || 'http://localhost:3000/uploads/profile_pictures';
+      user.str_user_profile_picture = `${basePath}/${user.str_user_profile_picture}`;
+    }
+
+    console.log(user.str_user_profile_picture);
+
     
     try {
       //* Retornamos el usuario 

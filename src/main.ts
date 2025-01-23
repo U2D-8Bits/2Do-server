@@ -17,7 +17,14 @@ async function bootstrap() {
   });
 
   //Config to serve static images
-  app.use('/uploads', express.static(join(__dirname, '..', 'uploads',)));
+  app.use(
+    '/uploads/profile-pictures',
+    express.static(join(__dirname, '..', 'uploads', 'profile_pictures')),
+  );
+  app.use(
+    '/uploads',
+    express.static(join(__dirname, '..', 'uploads')),
+  );
 
   const PORT = process.env.PORT ?? 3000;
   console.log(`Server running on port ${PORT}`);

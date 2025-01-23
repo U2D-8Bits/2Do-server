@@ -13,7 +13,7 @@ import { UsersService } from './users.service';
 
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage, Multer } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
 
 @Controller('api/users')
 export class UsersController {
@@ -74,7 +74,7 @@ export class UsersController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: '../../uploads/profile_pictures',
+        destination: join(__dirname, '..', '..', 'uploads', 'profile_pictures'),
         filename: (req, file, cb ) => {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
